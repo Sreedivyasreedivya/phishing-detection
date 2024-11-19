@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Detection Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Phishing Detection Tool</h2>
+        <form action="/check" method="POST" id="urlForm">
+            <input type="text" name="url" id="url" placeholder="Enter website URL" required>
+            <button type="submit">Check URL</button>
+        </form>
+
+        <!-- Results will appear here -->
+        <div id="result" class="result" style="display: none;">
+            <p><strong>URL:</strong> <span id="result-url"></span></p>
+            <p><strong>Is it a phishing site?</strong> <span id="result-phishing"></span></p>
+            <p><strong>SSL/TLS Valid:</strong> <span id="result-ssl"></span></p>
+            <p><strong>Has Suspicious Forms:</strong> <span id="result-forms"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle form submission and show results dynamically
+        document.getElementById('urlForm').onsubmit = function(event) {
+            event.preventDefault();  // Prevent the form from submitting normally
+            var url = document.getElementById('url').value;
+
+            // Make an AJAX request to the /check route
+            fetch('/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'url=' + encodeURIComponent(url)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the results dynamically
+                document.getElementById('result-url').textContent = data.url;
+                document.getElementById('result-phishing').textContent = data.is_phishing ? 'Yes' : 'No';
+                document.getElementById('result-ssl').textContent = data.ssl_valid ? 'Yes' : 'No';
+                document.getElementById('result-forms').textContent = data.has_suspicious_forms ? 'Yes' : 'No';
+
+                // Show the result section
+                document.getElementById('result').style.display = 'block';
+            })
+            .catch(error => {
+                alert('An error occurred');
+            });
+        };
+    </script>
+</body>
+</html>
